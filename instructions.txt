@@ -1,0 +1,19 @@
+Sous forme d'un outil en CLI, automatiser le processus d'inscriptions FIS etranger
+
+
+1. A partir d'un codex donné, aller chercher les infos de la course sur fisski
+    - aller d'abord sur https://www.fis-ski.com/DB/alpine-skiing/calendar-results.html?noselection=true&mi=menu-calendar
+    - faire une recherche par codex
+    - si la recherche renvoi plusieurs résultats, mettre un message d'erreur
+    - si la recherche renvoi un résultat : 
+        - recuperer le contenu de la colonne date
+        - aller sur la page de la course
+    -  recupere plusieurs infos de la course
+        - Titre de la page (Lieu + pays entre parantheses)
+        - Recuperer l'adresse email de l'organisateur
+
+2. Print les resultats dans un fichier csv avec les colonnes :
+    - Titre de la page (Lieu + pays entre parantheses)
+    - Adresse email de l'organisateur
+    - Date de la course
+    
