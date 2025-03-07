@@ -1,6 +1,9 @@
 import { program } from 'commander';
 import * as puppeteer from 'puppeteer';
 import Enquirer from 'enquirer';
+import dayjs from 'dayjs';
+import minMax from 'dayjs/plugin/minMax';
+dayjs.extend(minMax);
 // Structure de données qui définit les informations qu'on va récupérer pour chaque course
 interface RaceInfo {
     title: string;            // Le titre contenant le lieu et le pays
@@ -98,8 +101,12 @@ async function scrapeRaceInfo(codex: string): Promise<RaceInfo> {
         const url = page.url();
         console.log('URL de la page de la course:', url);
 
+        // Recupere la categorie (level)
+
         // Récupère le titre de la page qui contient le lieu et le pays
         const title = await page.$eval('.event-header__name', el => el.textContent?.trim() || '');
+
+
 
         // Cherche l'email de l'organisateur dans les détails de la course
         const organizerEmail = await page.evaluate(() => {
@@ -158,14 +165,37 @@ async function scrapeRaceInfo(codex: string): Promise<RaceInfo> {
     }
 }
 
+// Fonction utilitaire pour rendre le texte cliquable et copiable
+function makeTextClickableAndCopyable(text: string): string {
+    return `\x1b]8;;copy:${text}\x1b\\${text}\x1b]8;;\x1b\\`;
+}
+
 // Remplacer la fonction generateCSV par une fonction d'affichage
 function displayRaceInfo(raceInfo: RaceInfo, codex: string) {
+    const minDate = dayjs.min(raceInfo.dates.map(date => dayjs(date)));
+    const maxDate = dayjs.max(raceInfo.dates.map(date => dayjs(date)));
+
     console.log('\n=== Informations de la course ===');
     console.log(`Codex: ${codex}`);
     console.log(`Lieu: ${raceInfo.title}`);
     console.log(`Email: ${raceInfo.organizerEmail}`);
     console.log('\nDates:');
     raceInfo.dates.forEach(date => console.log(`  - ${date}`));
+    console.log('Periodes:')
+
+    // Format the period based on whether it's a single day or multiple days
+    let periodText = '';
+    if (minDate?.isSame(maxDate, 'day')) {
+        periodText = `${minDate?.format('DD MMM YY')} \x1b[34m${raceInfo.title}\x1b[0m`;
+    } else if (minDate?.isSame(maxDate, 'month')) {
+        periodText = `${minDate?.format('DD')}-${maxDate?.format('DD MMM YY')} ➙ \x1b[34m${raceInfo.title}\x1b[0m`;
+    } else {
+        periodText = `${minDate?.format('DD MMM')} - ${maxDate?.format('DD MMM YYYY')} ➞ \x1b[34m${raceInfo.title}\x1b[0m`;
+    }
+
+    // Rend le texte cliquable et copiable
+    console.log(makeTextClickableAndCopyable(periodText.replace(/\x1b\[[0-9;]*m/g, '')));
+
     console.log(`\nURL: ${raceInfo.url}`);
     console.log('===============================\n');
 }

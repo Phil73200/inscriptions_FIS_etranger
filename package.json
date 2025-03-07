@@ -12,6 +12,7 @@
   "dependencies": {
     "commander": "^12.1.0",
     "csv-writer": "^1.6.0",
+    "dayjs": "^1.11.13",
     "enquirer": "^2.4.1",
     "puppeteer": "^23.11.1"
   }
